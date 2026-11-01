@@ -4,19 +4,24 @@ import TelegramCore
 
 public struct SGStatus: Equatable, Codable {
     public var status: Int64
-    
+
+    // MARK: Swiftgram Mod — Pro unlocked
+    // Self-built IPAs have no App Store IAP: every status comparison in the app is
+    // `status > 1` / `status < 2`, so 2 is the canonical Pro value.
+    public static let proUnlockedValue: Int64 = 2
+
     public static var `default`: SGStatus {
-        return SGStatus(status: 1)
+        return SGStatus(status: SGStatus.proUnlockedValue)
     }
-    
+
     public init(status: Int64) {
         self.status = status
     }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: StringCodingKey.self)
 
-        self.status = try container.decodeIfPresent(Int64.self, forKey: "status") ?? 1
+    public init(from decoder: Decoder) throws {
+        // MARK: Swiftgram Mod — Pro unlocked: clamp any persisted value (including a
+        // free-tier 1 written by an earlier install) to Pro
+        self.status = SGStatus.proUnlockedValue
     }
     
     public func encode(to encoder: Encoder) throws {

@@ -179,6 +179,12 @@ public class SGSimpleSettings {
         case sendWithReturnKey
         case videoControlsInFooter
         case hideAccountInNotifications
+        // MARK: Swiftgram Mod
+        case keepDeletedMessages
+        case ignoreProtectedContent
+        case ghostReadReceipts
+        case ghostTyping
+        case ghostOnlineStatus
     }
     
     public enum DownloadSpeedBoostValues: String, CaseIterable {
@@ -340,7 +346,14 @@ public class SGSimpleSettings {
         Keys.legacyNotificationsFix.rawValue: false,
         Keys.pinnedMessageNotifications.rawValue: PinnedMessageNotificationsSettings.default.rawValue,
         Keys.mentionsAndRepliesNotifications.rawValue: MentionsAndRepliesNotificationsSettings.default.rawValue,
-        Keys.status.rawValue: 1,
+        // MARK: Swiftgram Mod — Pro unlocked
+        Keys.status.rawValue: 2,
+        // MARK: Swiftgram Mod — anti-revoke + unrestricted saving on by default
+        Keys.keepDeletedMessages.rawValue: true,
+        Keys.ignoreProtectedContent.rawValue: true,
+        Keys.ghostReadReceipts.rawValue: false,
+        Keys.ghostTyping.rawValue: false,
+        Keys.ghostOnlineStatus.rawValue: false,
         Keys.showRepostToStoryV2.rawValue: true,
         Keys.hideAccountInNotifications.rawValue: false,
     ]
@@ -552,7 +565,23 @@ public class SGSimpleSettings {
     @UserDefault(key: Keys.status.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
     public var status: Int64
 
-    public var ephemeralStatus: Int64 = 1
+    public var ephemeralStatus: Int64 = 2 // MARK: Swiftgram Mod — Pro unlocked
+
+    // MARK: Swiftgram Mod
+    @UserDefault(key: Keys.keepDeletedMessages.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var keepDeletedMessages: Bool
+
+    @UserDefault(key: Keys.ignoreProtectedContent.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var ignoreProtectedContent: Bool
+
+    @UserDefault(key: Keys.ghostReadReceipts.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var ghostReadReceipts: Bool
+
+    @UserDefault(key: Keys.ghostTyping.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var ghostTyping: Bool
+
+    @UserDefault(key: Keys.ghostOnlineStatus.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var ghostOnlineStatus: Bool
     
     @UserDefault(key: Keys.messageFilterKeywords.rawValue)
     public var messageFilterKeywords: [String]

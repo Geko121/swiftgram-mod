@@ -3724,6 +3724,10 @@ extension AppDelegate {
     }
     
     func fetchSGStatus(primaryContext: AccountContext) async {
+        // MARK: Swiftgram Mod — Pro unlocked: a self-built app has no App Store purchase to
+        // validate against Swiftgram's backend, and the backend response would downgrade the
+        // forced Pro status. Keep SGStatus at its Pro default and skip the check entirely.
+        return
         // TODO(swiftgram): Stuck on getting shouldKeepConnection
         // Perhaps, we can drop on some timeout?
 //        let currentShouldKeepConnection = await (primaryContext.account.network.shouldKeepConnection.get() |> take(1) |> deliverOnMainQueue).awaitable()

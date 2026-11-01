@@ -2,6 +2,7 @@ import Foundation
 import Postbox
 internal import TelegramApi
 import SwiftSignalKit
+import SGSimpleSettings
 
 
 private enum PeerReadStateMarker: Equatable {
@@ -425,6 +426,15 @@ private func pushPeerReadState(network: Network, postbox: Postbox, stateManager:
 }
 
 func synchronizePeerReadState(network: Network, postbox: Postbox, stateManager: AccountStateManager, peerId: PeerId, push: Bool, validate: Bool) -> Signal<Never, PeerReadStateValidationError> {
+    // MARK: Swiftgram Mod — Ghost Mode: suppress outgoing read receipts.
+    // Local read state is applied before this runs; the server simply never learns about it.
+    // Both push and validate are skipped: pushing is the leak itself, and validation would
+    // find the server behind local state and retry forever. Confirming the operation keeps
+    // the synchronizer from rescheduling it.
+    if SGSimpleSettings.shared.ghostReadReceipts {
+        return confirmSynchronized(postbox: postbox, peerId: peerId)
+        |> ignoreValues
+    }
     // A channel the account is not a member of has no read state on the server
     // (NonMemberChannelReadState.swift): nothing is pushed or validated, and the queued operation
     // is confirmed so the manager does not pick it up again. This also covers paths that queue one

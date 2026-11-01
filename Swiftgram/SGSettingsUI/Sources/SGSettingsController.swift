@@ -42,6 +42,7 @@ private enum SGControllerSection: Int32, SGItemListSection {
     case contextMenu
     case accountColors
     case other
+    case mod
 }
 
 private enum SGBoolSetting: String {
@@ -107,6 +108,12 @@ private enum SGBoolSetting: String {
     case tabBarSearchEnabled
     case videoControlsInFooter
     case hideAccountInNotifications
+    // MARK: Swiftgram Mod
+    case keepDeletedMessages
+    case ignoreProtectedContent
+    case ghostReadReceipts
+    case ghostTyping
+    case ghostOnlineStatus
 }
 
 private enum SGOneFromManySetting: String {
@@ -332,6 +339,19 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.notice(id: id.count, section: .other, text: i18n("Settings.HidePhoneInSettingsUI.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .other, settingName: .hideAccountInNotifications, value: SGSimpleSettings.shared.hideAccountInNotifications, text: i18n("Settings.HideAccountInNotifications", lang), enabled: true))
     
+    // MARK: Swiftgram Mod
+    entries.append(.header(id: id.count, section: .mod, text: i18n("Settings.Mod.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .keepDeletedMessages, value: SGSimpleSettings.shared.keepDeletedMessages, text: i18n("Settings.Mod.KeepDeleted", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.KeepDeleted.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .ignoreProtectedContent, value: SGSimpleSettings.shared.ignoreProtectedContent, text: i18n("Settings.Mod.IgnoreProtected", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.IgnoreProtected.Notice", lang)))
+    entries.append(.header(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.Header", lang), badge: nil))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostReadReceipts, value: SGSimpleSettings.shared.ghostReadReceipts, text: i18n("Settings.Mod.Ghost.ReadReceipts", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.ReadReceipts.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostTyping, value: SGSimpleSettings.shared.ghostTyping, text: i18n("Settings.Mod.Ghost.Typing", lang), enabled: true))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostOnlineStatus, value: SGSimpleSettings.shared.ghostOnlineStatus, text: i18n("Settings.Mod.Ghost.OnlineStatus", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.Notice", lang)))
+    
     return filterSGItemListUIEntrires(entries: entries, by: state.searchQuery)
 }
 
@@ -528,6 +548,20 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
             SGSimpleSettings.shared.videoControlsInFooter = value
         case .hideAccountInNotifications:
             SGSimpleSettings.shared.hideAccountInNotifications = value
+            SGSimpleSettings.shared.synchronizeShared()
+        // MARK: Swiftgram Mod
+        case .keepDeletedMessages:
+            SGSimpleSettings.shared.keepDeletedMessages = value
+        case .ignoreProtectedContent:
+            SGSimpleSettings.shared.ignoreProtectedContent = value
+        case .ghostReadReceipts:
+            SGSimpleSettings.shared.ghostReadReceipts = value
+            SGSimpleSettings.shared.synchronizeShared()
+        case .ghostTyping:
+            SGSimpleSettings.shared.ghostTyping = value
+            SGSimpleSettings.shared.synchronizeShared()
+        case .ghostOnlineStatus:
+            SGSimpleSettings.shared.ghostOnlineStatus = value
             SGSimpleSettings.shared.synchronizeShared()
         }
     }, updateSliderValue: { setting, value in
