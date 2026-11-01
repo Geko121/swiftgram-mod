@@ -1,129 +1,102 @@
-# Swiftgram
+# Swiftgram Mod — self-built Telegram client for iOS
 
-Supercharged Telegram fork for iOS
+A personal build of [Swiftgram](https://github.com/Swiftgram/Telegram-iOS) (itself a fork of
+[Telegram-iOS](https://github.com/TelegramMessenger/Telegram-iOS)) with additional mods, compiled
+to a sideloadable IPA by GitHub Actions on a macOS runner. **No Xcode or Mac required.**
 
-[<img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" height="50">](https://apps.apple.com/app/apple-store/id6471879502?pt=126511626&ct=gh&mt=8)
+## What's in this fork
 
-- Download: [App Store](https://apps.apple.com/app/apple-store/id6471879502?pt=126511626&ct=gh&mt=8)
-- Telegram channel: https://t.me/swiftgram
-- Telegram chat: https://t.me/swiftgramchat
-- TestFlight beta, local chats, translations and other [@SwiftgramLinks](https://t.me/s/SwiftgramLinks)
+Everything upstream Swiftgram ships (unlimited accounts, full customization, download/upload
+boosts, translator, voice-to-text, session backup, 50+ settings…) **plus**:
 
-Swiftgram's compilation steps are the same as for the official app. Below you'll find a complete compilation guide based on the official app.
+| Mod | Default | What it does |
+|---|---|---|
+| **Pro unlocked** | always on | Swiftgram Pro is force-enabled. A self-built IPA has no App Store IAP, so the paywall and the backend status check are removed. All Pro features (session backup, message filter, formatting panel, unique app icons, Pro notifications settings) are available for free in this build. |
+| **Keep deleted messages** | on | Messages deleted by others ("delete for everyone" in private chats, group/channel clean-ups) stay in your local history. Your own deletions work normally. |
+| **Unrestricted saving** | on | Chats/channels with "protected content" (noforwards) behave like normal chats: save, forward, copy, share, download media, and take screenshots. The media bytes are already on your device to display them; only the client-side enforcement is removed. |
+| **Ghost mode — read receipts** | off | Read messages without the server telling the other side. |
+| **Ghost mode — typing indicator** | off | Never send "typing…" to anyone. |
+| **Ghost mode — online status** | off | Never report yourself online; you appear as last-seen. |
 
-# Telegram iOS Source Code Compilation Guide
+All toggles live in **Settings → Swiftgram → MOD FEATURES** (bottom of the list).
 
-We welcome all developers to use our API and source code to create applications on our platform.
-There are several things we require from **all developers** for the moment.
+## Mod map (where the changes live)
 
-# Creating your Telegram Application
+| Mod | File(s) |
+|---|---|
+| Pro unlock | `Swiftgram/SGStatus/Sources/SGStatus.swift` (status forced to 2), `Swiftgram/SGSimpleSettings/Sources/SimpleSettings.swift` (defaults), `submodules/TelegramUI/Sources/AppDelegate.swift` (`fetchSGStatus` disabled) |
+| Keep deleted | `submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift` (`updateDeleteMessages`, `updateDeleteChannelMessages` — pts still advances) |
+| Unrestricted saving | `submodules/TelegramCore/Sources/Utils/MessageUtils.swift` (`isCopyProtected`), `submodules/TelegramCore/Sources/Utils/PeerUtils.swift` (`isCopyProtectionEnabled`) |
+| Ghost read receipts | `submodules/TelegramCore/Sources/State/SynchronizePeerReadState.swift` |
+| Ghost typing | `submodules/TelegramCore/Sources/State/ManagedLocalInputActivities.swift` |
+| Ghost online | `submodules/TelegramCore/Sources/State/ManagedAccountPresence.swift` |
+| Settings UI | `Swiftgram/SGSettingsUI/Sources/SGSettingsController.swift`, `Swiftgram/SGStrings/Strings/en.lproj/SGLocalizable.strings` |
 
-1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application.
-2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
-3. Kindly **do not** use our standard logo (white paper plane in a blue circle) as your app's logo.
-3. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
-4. Please remember to publish **your** code too in order to comply with the licences.
+All mods are tagged `// MARK: Swiftgram Mod` in the source.
 
-# Quick Compilation Guide
+## Build it
 
-## Get the Code
+### 1. Push this repo to GitHub
 
-```
-git clone --recursive -j8 https://github.com/Swiftgram/Telegram-iOS.git
-```
+Create an **empty** repository on GitHub (public is recommended: macOS runners cost 10× minutes
+on private repos, and public repos get unlimited Actions minutes) and push:
 
-## Setup Xcode
-
-Install Xcode (directly from https://developer.apple.com/download/applications or using the App Store).
-
-## Adjust Configuration
-
-1. Generate a random identifier:
-```
-openssl rand -hex 8
-```
-2. Create a new Xcode project. Use `Swiftgram` as the Product Name. Use `org.{identifier from step 1}` as the Organization Identifier.
-3. Open `Keychain Access` and navigate to `Certificates`. Locate `Apple Development: your@email.address (XXXXXXXXXX)` and double tap the certificate. Under `Details`, locate `Organizational Unit`. This is the Team ID.
-4. Edit `build-system/template_minimal_development_configuration.json`. Use data from the previous steps.
-
-## Generate an Xcode project
-
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    generateProject \
-    --configurationPath=build-system/template_minimal_development_configuration.json \
-    --xcodeManagedCodesigning
+```bash
+git remote add origin git@github.com:YOUR_USERNAME/YOUR_REPO.git
+git push -u origin main
 ```
 
-# Advanced Compilation Guide
+### 2. Add your Telegram API credentials
 
-## Xcode
+Get your own `api_id` / `api_hash` at **https://my.telegram.org/apps** (Telegram requires every
+self-built client to use its own application id), then add repository secrets:
 
-1. Copy and edit `build-system/appstore-configuration.json`.
-2. Copy `build-system/fake-codesigning`. Create and download provisioning profiles, using the `profiles` folder as a reference for the entitlements.
-3. Generate an Xcode project:
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    generateProject \
-    --configurationPath=configuration_from_step_1.json \
-    --codesigningInformationPath=directory_from_step_2
-```
+- `Settings → Secrets and variables → Actions → New repository secret`
+- `TELEGRAM_API_ID` — your numeric api_id
+- `TELEGRAM_API_HASH` — your api_hash
 
-## IPA
+### 3. Run the workflow
 
-1. Repeat the steps from the previous section. Use distribution provisioning profiles.
-2. Run:
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    build \
-    --configurationPath=...see previous section... \
-    --codesigningInformationPath=...see previous section... \
-    --buildNumber=100001 \
-    --configuration=release_arm64
-```
+`Actions → Build Modded IPA → Run workflow`. The build takes roughly 60–120 minutes on the
+first run (later runs reuse the Bazel cache). When it finishes, download the
+`SwiftgramMod-…` artifact from the run page — it contains the unsigned IPA.
 
-# FAQ
+The IPA is built with fake codesigning against the well-known fake profile that ships in the
+repo (`ph.telegra.Telegraph` / team `C67CF9S4VU`). Your sideload tool rewrites the bundle id and
+re-signs it with your certificate when installing, so it coexists with App Store Telegram and
+Swiftgram.
 
-## Xcode is stuck at "build-request.json not updated yet"
+## Sideload
 
-Occasionally, you might observe the following message in your build log:
-```
-"/Users/xxx/Library/Developer/Xcode/DerivedData/Telegram-xxx/Build/Intermediates.noindex/XCBuildData/xxx.xcbuilddata/build-request.json" not updated yet, waiting...
-```
+The produced IPA is unsigned — install it with any of:
 
-Should this occur, simply cancel the ongoing build and initiate a new one.
+- **TrollStore** (iOS 14.0–17.0, best option): no re-signing, no 7-day expiry, extensions work.
+- **Sideloadly** (any iOS, free Apple ID): install with your Apple ID; free accounts get a
+  7-day signing window and a 3-app limit.
+- **AltStore / SideStore** (any iOS): same free-Apple-ID constraints, with on-device refresh.
 
-## Telegram_xcodeproj: no such package 
+Notes:
 
-Following a system restart, the auto-generated Xcode project might encounter a build failure accompanied by this error:
-```
-ERROR: Skipping '@rules_xcodeproj_generated//generator/Telegram/Telegram_xcodeproj:Telegram_xcodeproj': no such package '@rules_xcodeproj_generated//generator/Telegram/Telegram_xcodeproj': BUILD file not found in directory 'generator/Telegram/Telegram_xcodeproj' of external repository @rules_xcodeproj_generated. Add a BUILD file to a directory to mark it as a package.
+- The free-Apple-ID route installs the main app fine; the bundled widgets/notifications
+  extensions may be stripped or need "include all app extensions" enabled in the tool.
+- After installing, open **Settings → Swiftgram → MOD FEATURES** and set the toggles you want.
+
+## Sync with upstream
+
+```bash
+git remote add upstream https://github.com/Swiftgram/Telegram-iOS.git
+git fetch upstream --unshallow        # or: git fetch upstream
+git merge upstream/master             # resolve conflicts near the MARK: Swiftgram Mod tags
 ```
 
-If you encounter this issue, re-run the project generation steps in the README.
+## Requirements from Telegram / licensing
 
+- This fork keeps upstream's licenses (GPL). If you distribute your IPA, you must offer the
+  corresponding source — this repo is that source; publish it.
+- Use your own api_id (that's what the secrets are for); don't share it.
+- The app is unofficial. Don't call it "Telegram".
 
-# Tips
+## Credits
 
-## Codesigning is not required for simulator-only builds
-
-Add `--disableProvisioningProfiles`:
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    generateProject \
-    --configurationPath=path-to-configuration.json \
-    --codesigningInformationPath=path-to-provisioning-data \
-    --disableProvisioningProfiles
-```
-
-## Versions
-
-Each release is built using a specific Xcode version (see `versions.json`). The helper script checks the versions of the installed software and reports an error if they don't match the ones specified in `versions.json`. It is possible to bypass these checks:
-
-```
-python3 build-system/Make/Make.py --overrideXcodeVersion build ... # Don't check the version of Xcode
-```
+- [Swiftgram](https://github.com/Swiftgram) — the fork this is based on
+- [Telegram-iOS](https://github.com/TelegramMessenger/Telegram-iOS) — upstream

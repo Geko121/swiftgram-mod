@@ -4,6 +4,7 @@ import SwiftSignalKit
 internal import TelegramApi
 import MtProtoKit
 import EncryptionProvider
+import SGSimpleSettings
 
 private func reactionGeneratedEvent(_ previousReactions: ReactionsMessageAttribute?, _ updatedReactions: ReactionsMessageAttribute?, message: Message, transaction: Transaction) -> (reactionAuthor: Peer, reaction: MessageReaction.Reaction, message: Message, timestamp: Int32)? {
     if let updatedReactions = updatedReactions, !message.flags.contains(.Incoming), message.id.peerId.namespace == Namespaces.Peer.CloudUser {
@@ -972,7 +973,12 @@ private func finalStateWithUpdatesAndServerTime(accountPeerId: PeerId, postbox: 
                     if previousState.pts >= pts {
                         Logger.shared.log("State", "channel \(peerId) (\((updatedState.peers[peerId] as? TelegramChannel)?.title ?? "nil")) skip old delete update")
                     } else if previousState.pts + ptsCount == pts {
-                        updatedState.deleteMessages(messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
+                        // MARK: Swiftgram Mod — anti-revoke: keep the messages, but still
+                        // advance pts — otherwise the state machine sees a hole and refetches
+                        // the difference, which would replay the deletion anyway
+                        if !SGSimpleSettings.shared.keepDeletedMessages {
+                            updatedState.deleteMessages(messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
+                        }
                         updatedState.updateChannelState(peerId, pts: pts)
                     } else {
                         if !missingUpdatesFromChannels.contains(peerId) {
@@ -1062,7 +1068,12 @@ private func finalStateWithUpdatesAndServerTime(accountPeerId: PeerId, postbox: 
                 let peerId = PeerId(namespace: Namespaces.Peer.CloudChannel, id: PeerId.Id._internalFromInt64Value(channelId))
                 updatedState.updateMinAvailableMessage(MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: minId))
             case let .updateDeleteMessages(updateDeleteMessagesData):
-                updatedState.deleteMessagesWithGlobalIds(updateDeleteMessagesData.messages)
+                // MARK: Swiftgram Mod — anti-revoke: keep messages that were deleted
+                // server-side (delete-for-everyone in private chats and basic groups).
+                // The pts gap still advances, so state tracking is unaffected.
+                if !SGSimpleSettings.shared.keepDeletedMessages {
+                    updatedState.deleteMessagesWithGlobalIds(updateDeleteMessagesData.messages)
+                }
             case let .updatePinnedMessages(updatePinnedMessagesData):
                 let (flags, peer, messages) = (updatePinnedMessagesData.flags, updatePinnedMessagesData.peer, updatePinnedMessagesData.messages)
                 let peerId = peer.peerId
@@ -3561,8 +3572,11 @@ private func pollChannel(accountPeerId: PeerId, postbox: Postbox, network: Netwo
                 for update in otherUpdates {
                     switch update {
                     case let .updateDeleteChannelMessages(updateDeleteChannelMessagesData):
-                        let peerId = peer.id
-                        updatedState.deleteMessages(updateDeleteChannelMessagesData.messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
+                        // MARK: Swiftgram Mod — anti-revoke: same for supergroups and channels
+                        if !SGSimpleSettings.shared.keepDeletedMessages {
+                            let peerId = peer.id
+                            updatedState.deleteMessages(updateDeleteChannelMessagesData.messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
+                        }
                     case let .updateEditChannelMessage(updateEditChannelMessageData):
                         let apiMessage = updateEditChannelMessageData.message
                         var peerIsForum = peer.isForum

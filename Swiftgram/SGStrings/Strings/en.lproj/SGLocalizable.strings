@@ -282,3 +282,16 @@
 "Settings.NY.Style.lightning" = "Lightning";
 "Settings.NY.Notice" = "Available for a limited time only!";
 "Settings.HideAccountInNotifications" = "Hide Account in Notifications";
+
+/* Swiftgram Mod */
+"Settings.Mod.Header" = "MOD FEATURES";
+"Settings.Mod.KeepDeleted" = "Keep Deleted Messages";
+"Settings.Mod.KeepDeleted.Notice" = "Messages and media that others delete (\"delete for everyone\", channel clean-ups) are kept in your chat history.";
+"Settings.Mod.IgnoreProtected" = "Unrestricted Saving";
+"Settings.Mod.IgnoreProtected.Notice" = "Ignore \"protected content\" restrictions: save, forward and copy media in chats and channels that disable it. Screenshots are also allowed in those chats.";
+"Settings.Mod.Ghost.Header" = "GHOST MODE";
+"Settings.Mod.Ghost.ReadReceipts" = "Hide Read Receipts";
+"Settings.Mod.Ghost.ReadReceipts.Notice" = "Read messages without the server telling the other side. Unread counts on your other devices will lag behind.";
+"Settings.Mod.Ghost.Typing" = "Hide Typing Indicator";
+"Settings.Mod.Ghost.OnlineStatus" = "Hide Online Status";
+"Settings.Mod.Ghost.Notice" = "When online status is hidden you appear as last seen at the time you enabled it.";

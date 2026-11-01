@@ -260,6 +260,12 @@ public extension Peer {
     }
     
     var isCopyProtectionEnabled: Bool {
+        // MARK: Swiftgram Mod — unrestricted saving: report chats/channels with
+        // protected content (noforwards) as unprotected. Controls the chat-level gates:
+        // screenshot/screen-recording blocking and save/forward UI availability.
+        if SGSimpleSettings.shared.ignoreProtectedContent {
+            return false
+        }
         switch self {
         case let group as TelegramGroup:
             return group.flags.contains(.copyProtectionEnabled)

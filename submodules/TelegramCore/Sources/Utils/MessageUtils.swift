@@ -1,6 +1,7 @@
 import Foundation
 import Postbox
 internal import TelegramApi
+import SGSimpleSettings
 
 public extension MessageFlags {
     var isSending: Bool {
@@ -536,6 +537,12 @@ public extension Message {
     }
     
     func isCopyProtected() -> Bool {
+        // MARK: Swiftgram Mod — unrestricted saving: when enabled, treat protected
+        // content (noforwards chats and channels) as regular content. The media bytes are
+        // already on the device to display them; the restriction is client-side only.
+        if SGSimpleSettings.shared.ignoreProtectedContent {
+            return false
+        }
         if self.flags.contains(.CopyProtected) {
             return true
         } else if let group = self.peers[self.id.peerId] as? TelegramGroup, group.flags.contains(.copyProtectionEnabled) {
