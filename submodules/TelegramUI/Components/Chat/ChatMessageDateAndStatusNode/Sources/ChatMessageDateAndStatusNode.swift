@@ -616,7 +616,36 @@ public class ChatMessageDateAndStatusNode: ASDisplayNode {
             }
             
             let dateFont = Font.regular(floor(arguments.presentationData.fontSize.baseDisplaySize * 11.0 / 17.0))
-            let (date, dateApply) = dateLayout(TextNodeLayoutArguments(attributedString: NSAttributedString(string: updatedDateText, font: dateFont, textColor: dateColor), backgroundColor: nil, maximumNumberOfLines: 1, truncationType: .middle, constrainedSize: arguments.constrainedSize, alignment: .natural, cutout: nil, insets: UIEdgeInsets()))
+            // MARK: Swiftgram Mod — deleted-message marker: render the sentinel-wrapped
+            // prefix in the configured color, the rest in the regular date color.
+            let dateAttributedString: NSAttributedString
+            if let start = updatedDateText.firstIndex(of: "\u{E000}"), let end = updatedDateText.firstIndex(of: "\u{E001}"), start < end {
+                let label = String(updatedDateText[updatedDateText.index(after: start)..<end])
+                var rest = String(updatedDateText[updatedDateText.index(after: end)...])
+                if rest.hasPrefix(" ") {
+                    rest = String(rest.dropFirst())
+                }
+                let markerColor: UIColor
+                switch SGSimpleSettings.shared.deletedBadgeColor {
+                case "red":
+                    markerColor = .systemRed
+                case "orange":
+                    markerColor = .systemOrange
+                case "green":
+                    markerColor = .systemGreen
+                case "gray":
+                    markerColor = .systemGray
+                default:
+                    markerColor = dateColor
+                }
+                let combined = NSMutableAttributedString()
+                combined.append(NSAttributedString(string: label + " ", font: dateFont, textColor: markerColor))
+                combined.append(NSAttributedString(string: rest, font: dateFont, textColor: dateColor))
+                dateAttributedString = combined
+            } else {
+                dateAttributedString = NSAttributedString(string: updatedDateText, font: dateFont, textColor: dateColor)
+            }
+            let (date, dateApply) = dateLayout(TextNodeLayoutArguments(attributedString: dateAttributedString, backgroundColor: nil, maximumNumberOfLines: 1, truncationType: .middle, constrainedSize: arguments.constrainedSize, alignment: .natural, cutout: nil, insets: UIEdgeInsets()))
             
             let checkOffset = floor(arguments.presentationData.fontSize.baseDisplaySize * 6.0 / 17.0)
             

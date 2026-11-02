@@ -6,6 +6,55 @@ import MtProtoKit
 import EncryptionProvider
 import SGSimpleSettings
 
+// MARK: Swiftgram Mod — anti-revoke: instead of deleting server-deleted messages, flag
+// them with SGDeletedMessageAttribute so the UI can mark them. Self-scheduled on the
+// postbox transaction queue; idempotent when a state replay re-delivers the same update.
+private func sgMarkMessagesAsDeleted(postbox: Postbox, messageIds: [MessageId]) {
+    guard !messageIds.isEmpty else {
+        return
+    }
+    let timestamp = Int32(CFAbsoluteTimeGetCurrent() + NSTimeIntervalSince1970)
+    let _ = (postbox.transaction { transaction -> Void in
+        for id in messageIds {
+            if let message = transaction.getMessage(id) {
+                if !message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+                    transaction.updateMessage(id, update: { current in
+                        var storeForwardInfo: StoreMessageForwardInfo?
+                        if let forwardInfo = current.forwardInfo {
+                            storeForwardInfo = StoreMessageForwardInfo(authorId: forwardInfo.author?.id, sourceId: forwardInfo.source?.id, sourceMessageId: forwardInfo.sourceMessageId, date: forwardInfo.date, authorSignature: forwardInfo.authorSignature, psaType: forwardInfo.psaType, flags: forwardInfo.flags)
+                        }
+                        return .update(StoreMessage(id: current.id, customStableId: nil, globallyUniqueId: current.globallyUniqueId, groupingKey: current.groupingKey, threadId: current.threadId, timestamp: current.timestamp, flags: StoreMessageFlags(current.flags), tags: current.tags, globalTags: current.globalTags, localTags: current.localTags, forwardInfo: storeForwardInfo, authorId: current.author?.id, text: current.text, attributes: current.attributes + [SGDeletedMessageAttribute(timestamp: timestamp)], media: current.media))
+                    })
+                }
+            }
+        }
+    }).start()
+}
+
+private func sgMarkMessagesAsDeletedWithGlobalIds(postbox: Postbox, globalIds: [Int32]) {
+    guard !globalIds.isEmpty else {
+        return
+    }
+    let timestamp = Int32(CFAbsoluteTimeGetCurrent() + NSTimeIntervalSince1970)
+    let _ = (postbox.transaction { transaction -> Void in
+        let messageIds = transaction.messageIdsForGlobalIds(globalIds)
+        for id in messageIds {
+            if let message = transaction.getMessage(id) {
+                if !message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+                    transaction.updateMessage(id, update: { current in
+                        var storeForwardInfo: StoreMessageForwardInfo?
+                        if let forwardInfo = current.forwardInfo {
+                            storeForwardInfo = StoreMessageForwardInfo(authorId: forwardInfo.author?.id, sourceId: forwardInfo.source?.id, sourceMessageId: forwardInfo.sourceMessageId, date: forwardInfo.date, authorSignature: forwardInfo.authorSignature, psaType: forwardInfo.psaType, flags: forwardInfo.flags)
+                        }
+                        return .update(StoreMessage(id: current.id, customStableId: nil, globallyUniqueId: current.globallyUniqueId, groupingKey: current.groupingKey, threadId: current.threadId, timestamp: current.timestamp, flags: StoreMessageFlags(current.flags), tags: current.tags, globalTags: current.globalTags, localTags: current.localTags, forwardInfo: storeForwardInfo, authorId: current.author?.id, text: current.text, attributes: current.attributes + [SGDeletedMessageAttribute(timestamp: timestamp)], media: current.media))
+                    })
+                }
+            }
+        }
+    }).start()
+}
+
+
 private func reactionGeneratedEvent(_ previousReactions: ReactionsMessageAttribute?, _ updatedReactions: ReactionsMessageAttribute?, message: Message, transaction: Transaction) -> (reactionAuthor: Peer, reaction: MessageReaction.Reaction, message: Message, timestamp: Int32)? {
     if let updatedReactions = updatedReactions, !message.flags.contains(.Incoming), message.id.peerId.namespace == Namespaces.Peer.CloudUser {
         let prev = previousReactions?.reactions ?? []
@@ -973,10 +1022,13 @@ private func finalStateWithUpdatesAndServerTime(accountPeerId: PeerId, postbox: 
                     if previousState.pts >= pts {
                         Logger.shared.log("State", "channel \(peerId) (\((updatedState.peers[peerId] as? TelegramChannel)?.title ?? "nil")) skip old delete update")
                     } else if previousState.pts + ptsCount == pts {
-                        // MARK: Swiftgram Mod — anti-revoke: keep the messages, but still
-                        // advance pts — otherwise the state machine sees a hole and refetches
-                        // the difference, which would replay the deletion anyway
-                        if !SGSimpleSettings.shared.keepDeletedMessages {
+                        // MARK: Swiftgram Mod — anti-revoke: keep the messages (flagged for
+                        // the deleted marker), but still advance pts — otherwise the state
+                        // machine sees a hole and refetches the difference, which would
+                        // replay the deletion anyway
+                        if SGSimpleSettings.shared.keepDeletedMessages {
+                            sgMarkMessagesAsDeleted(postbox: postbox, messageIds: messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
+                        } else {
                             updatedState.deleteMessages(messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
                         }
                         updatedState.updateChannelState(peerId, pts: pts)
@@ -1069,9 +1121,11 @@ private func finalStateWithUpdatesAndServerTime(accountPeerId: PeerId, postbox: 
                 updatedState.updateMinAvailableMessage(MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: minId))
             case let .updateDeleteMessages(updateDeleteMessagesData):
                 // MARK: Swiftgram Mod — anti-revoke: keep messages that were deleted
-                // server-side (delete-for-everyone in private chats and basic groups).
-                // The pts gap still advances, so state tracking is unaffected.
-                if !SGSimpleSettings.shared.keepDeletedMessages {
+                // server-side (delete-for-everyone in private chats and basic groups),
+                // flagging them for the deleted marker. The pts gap still advances.
+                if SGSimpleSettings.shared.keepDeletedMessages {
+                    sgMarkMessagesAsDeletedWithGlobalIds(postbox: postbox, globalIds: updateDeleteMessagesData.messages)
+                } else {
                     updatedState.deleteMessagesWithGlobalIds(updateDeleteMessagesData.messages)
                 }
             case let .updatePinnedMessages(updatePinnedMessagesData):
@@ -3572,8 +3626,10 @@ private func pollChannel(accountPeerId: PeerId, postbox: Postbox, network: Netwo
                 for update in otherUpdates {
                     switch update {
                     case let .updateDeleteChannelMessages(updateDeleteChannelMessagesData):
-                        // MARK: Swiftgram Mod — anti-revoke: same for supergroups and channels
-                        if !SGSimpleSettings.shared.keepDeletedMessages {
+                        // MARK: Swiftgram Mod — anti-revoke: same for the channel difference replay
+                        if SGSimpleSettings.shared.keepDeletedMessages {
+                            sgMarkMessagesAsDeleted(postbox: postbox, messageIds: updateDeleteChannelMessagesData.messages.map({ MessageId(peerId: peer.id, namespace: Namespaces.Message.Cloud, id: $0) }))
+                        } else {
                             let peerId = peer.id
                             updatedState.deleteMessages(updateDeleteChannelMessagesData.messages.map({ MessageId(peerId: peerId, namespace: Namespaces.Message.Cloud, id: $0) }))
                         }

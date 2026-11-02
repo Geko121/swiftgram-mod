@@ -741,7 +741,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
                     }
                 }
             } else if let image = media as? TelegramMediaImage {
-                if !messages[0].containsSecretMedia {
+                if !messages[0].isSaveRestricted() { // MARK: Swiftgram Mod
                     loadCopyMediaResource = largestImageRepresentation(image.representations)?.resource
                 }
             } else if let dice = media as? TelegramMediaDice {
@@ -1508,7 +1508,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
             }
         }
         
-        if resourceAvailable, !message.containsSecretMedia && !isCopyProtected {
+        if resourceAvailable, !message.isSaveRestricted() { // MARK: Swiftgram Mod
             var mediaReference: AnyMediaReference?
             var isVideo = false
             for media in message.effectiveMedia {
@@ -2722,9 +2722,9 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Engi
                     }
                 }
                 
-                if message.isCopyProtected() || message.containsSecretMedia {
+                if message.isSaveRestricted() {
                     isCopyProtected = true
-                }
+                } // MARK: Swiftgram Mod
                 
                 if isPeerCopyProtected(message.id.peerId) == true {
                     isCopyProtected = true
@@ -2762,7 +2762,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Engi
                 if id.namespace == Namespaces.Message.EphemeralLocal {
                     let isForwardingDisabled = (message.attributes.first(where: { $0 is EphemeralMessageAttribute }) as? EphemeralMessageAttribute)?.isForwardingDisabled ?? false
                     let isAction = message.media.contains(where: { $0 is TelegramMediaAction || $0 is TelegramMediaExpiredContent })
-                    if !isForwardingDisabled && !message.containsSecretMedia && !isAction && !isCopyProtected && !isShareProtected && !(message.flags.isSending || message.flags.contains(.Failed)) {
+                    if !isForwardingDisabled && !message.isSaveRestricted() && !isAction && !isCopyProtected && !isShareProtected && !(message.flags.isSending || message.flags.contains(.Failed)) { // MARK: Swiftgram Mod
                         optionsMap[id]!.insert(.forward)
                     }
                     optionsMap[id]!.insert(.deleteLocally)
@@ -2843,10 +2843,10 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Engi
                                 banPeer = nil
                             }
                         }
-                        if !message.containsSecretMedia && !isAction && !isShareProtected {
-                            if message.id.peerId.namespace != Namespaces.Peer.SecretChat && !message.isCopyProtected() {
+                        if !message.isSaveRestricted() && !isAction && !isShareProtected {
+                            if !message.isForwardRestricted() {
                                 if !(message.flags.isSending || message.flags.contains(.Failed)) {
-                                    optionsMap[id]!.insert(.forward)
+                                    optionsMap[id]!.insert(.forward) // MARK: Swiftgram Mod
                                 }
                             }
                         }
@@ -2859,7 +2859,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Engi
                             }
                         }
                     } else if let group = peer as? TelegramGroup {
-                        if message.id.peerId.namespace != Namespaces.Peer.SecretChat && !message.containsSecretMedia {
+                        if !message.isForwardRestricted() { // MARK: Swiftgram Mod
                             if !isAction && !message.isCopyProtected() && !isShareProtected {
                                 if !(message.flags.isSending || message.flags.contains(.Failed)) {
                                     optionsMap[id]!.insert(.forward)
@@ -2879,7 +2879,7 @@ func chatAvailableMessageActionsImpl(engine: TelegramEngine, accountPeerId: Engi
                             optionsMap[id]!.insert(.report)
                         }
                     } else if let user = peer as? TelegramUser {
-                        if !isScheduled && message.id.peerId.namespace != Namespaces.Peer.SecretChat && !message.containsSecretMedia && !isAction && !message.id.peerId.isReplies && !message.isCopyProtected() && !isShareProtected {
+                        if !isScheduled && !message.isForwardRestricted() && !isAction && !message.id.peerId.isReplies && !isShareProtected { // MARK: Swiftgram Mod
                             if !(message.flags.isSending || message.flags.contains(.Failed)) {
                                 optionsMap[id]!.insert(.forward)
                             }

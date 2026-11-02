@@ -185,6 +185,10 @@ public class SGSimpleSettings {
         case ghostReadReceipts
         case ghostTyping
         case ghostOnlineStatus
+        case stealthViewOnce
+        case showDeletedBadge
+        case deletedBadgeText
+        case deletedBadgeColor
     }
     
     public enum DownloadSpeedBoostValues: String, CaseIterable {
@@ -354,6 +358,10 @@ public class SGSimpleSettings {
         Keys.ghostReadReceipts.rawValue: false,
         Keys.ghostTyping.rawValue: false,
         Keys.ghostOnlineStatus.rawValue: false,
+        Keys.stealthViewOnce.rawValue: true,
+        Keys.showDeletedBadge.rawValue: true,
+        Keys.deletedBadgeText.rawValue: "deleted",
+        Keys.deletedBadgeColor.rawValue: "red",
         Keys.showRepostToStoryV2.rawValue: true,
         Keys.hideAccountInNotifications.rawValue: false,
     ]
@@ -582,6 +590,18 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.ghostOnlineStatus.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
     public var ghostOnlineStatus: Bool
+
+    @UserDefault(key: Keys.stealthViewOnce.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var stealthViewOnce: Bool
+
+    @UserDefault(key: Keys.showDeletedBadge.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var showDeletedBadge: Bool
+
+    @UserDefault(key: Keys.deletedBadgeText.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var deletedBadgeText: String
+
+    @UserDefault(key: Keys.deletedBadgeColor.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var deletedBadgeColor: String
     
     @UserDefault(key: Keys.messageFilterKeywords.rawValue)
     public var messageFilterKeywords: [String]

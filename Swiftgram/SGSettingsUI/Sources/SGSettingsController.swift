@@ -114,6 +114,8 @@ private enum SGBoolSetting: String {
     case ghostReadReceipts
     case ghostTyping
     case ghostOnlineStatus
+    case stealthViewOnce
+    case showDeletedBadge
 }
 
 private enum SGOneFromManySetting: String {
@@ -124,6 +126,9 @@ private enum SGOneFromManySetting: String {
 //    case allChatsFolderPositionOverride
     case translationBackend
     case transcriptionBackend
+    // MARK: Swiftgram Mod
+    case deletedBadgeText
+    case deletedBadgeColor
 }
 
 private enum SGSliderSetting: String {
@@ -345,6 +350,11 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.KeepDeleted.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .ignoreProtectedContent, value: SGSimpleSettings.shared.ignoreProtectedContent, text: i18n("Settings.Mod.IgnoreProtected", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.IgnoreProtected.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .stealthViewOnce, value: SGSimpleSettings.shared.stealthViewOnce, text: i18n("Settings.Mod.StealthViewOnce", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.StealthViewOnce.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .showDeletedBadge, value: SGSimpleSettings.shared.showDeletedBadge, text: i18n("Settings.Mod.DeletedBadge", lang), enabled: true))
+    entries.append(.oneFromManySelector(id: id.count, section: .mod, settingName: .deletedBadgeText, text: i18n("Settings.Mod.DeletedBadge.Label", lang), value: i18n("Settings.Mod.DeletedBadge.Label.\(SGSimpleSettings.shared.deletedBadgeText)", lang), enabled: SGSimpleSettings.shared.showDeletedBadge))
+    entries.append(.oneFromManySelector(id: id.count, section: .mod, settingName: .deletedBadgeColor, text: i18n("Settings.Mod.DeletedBadge.Color", lang), value: i18n("Settings.Mod.DeletedBadge.Color.\(SGSimpleSettings.shared.deletedBadgeColor)", lang), enabled: SGSimpleSettings.shared.showDeletedBadge))
     entries.append(.header(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.Header", lang), badge: nil))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostReadReceipts, value: SGSimpleSettings.shared.ghostReadReceipts, text: i18n("Settings.Mod.Ghost.ReadReceipts", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.ReadReceipts.Notice", lang)))
@@ -554,6 +564,12 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
             SGSimpleSettings.shared.keepDeletedMessages = value
         case .ignoreProtectedContent:
             SGSimpleSettings.shared.ignoreProtectedContent = value
+        case .stealthViewOnce:
+            SGSimpleSettings.shared.stealthViewOnce = value
+            SGSimpleSettings.shared.synchronizeShared()
+        case .showDeletedBadge:
+            SGSimpleSettings.shared.showDeletedBadge = value
+            SGSimpleSettings.shared.synchronizeShared()
         case .ghostReadReceipts:
             SGSimpleSettings.shared.ghostReadReceipts = value
             SGSimpleSettings.shared.synchronizeShared()
@@ -712,6 +728,31 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
                     items.append(ActionSheetButtonItem(title: i18n("Settings.NY.Style.\(value.rawValue)", presentationData.strings.baseLanguageCode), color: .accent, action: { [weak actionSheet] in
                         actionSheet?.dismissAnimated()
                         setAction(value.rawValue)
+                    }))
+                }
+            // MARK: Swiftgram Mod
+            case .deletedBadgeText:
+                let setAction: (String) -> Void = { value in
+                    SGSimpleSettings.shared.deletedBadgeText = value
+                    simplePromise.set(true)
+                }
+
+                for value in ["deleted", "unsent", "removed", "voided"] {
+                    items.append(ActionSheetButtonItem(title: i18n("Settings.Mod.DeletedBadge.Label.\(value)", presentationData.strings.baseLanguageCode), color: .accent, action: { [weak actionSheet] in
+                        actionSheet?.dismissAnimated()
+                        setAction(value)
+                    }))
+                }
+            case .deletedBadgeColor:
+                let setAction: (String) -> Void = { value in
+                    SGSimpleSettings.shared.deletedBadgeColor = value
+                    simplePromise.set(true)
+                }
+
+                for value in ["red", "orange", "green", "gray", "none"] {
+                    items.append(ActionSheetButtonItem(title: i18n("Settings.Mod.DeletedBadge.Color.\(value)", presentationData.strings.baseLanguageCode), color: .accent, action: { [weak actionSheet] in
+                        actionSheet?.dismissAnimated()
+                        setAction(value)
                     }))
                 }
         }
