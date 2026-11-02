@@ -6,6 +6,7 @@ import TelegramStringFormatting
 import TextFormat
 import LocalizedPeerData
 import AccountContext
+import SGSimpleSettings
 
 public enum MessageTimestampStatusFormat {
     case full
@@ -249,6 +250,13 @@ public func stringForMessageTimestampStatus(
         if let authorTitle = authorTitle, !authorTitle.isEmpty {
             dateText = "\(authorTitle), \(dateText)"
         }
+    }
+    
+    // MARK: Swiftgram Mod — deleted-message marker: wrap the label in private-use sentinel
+    // characters; ChatMessageDateAndStatusNode renders it as a colored prefix.
+    if SGSimpleSettings.shared.showDeletedBadge, message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+        let label = SGSimpleSettings.shared.deletedBadgeText
+        dateText = "\u{E000}\(label)\u{E001} \(dateText)"
     }
     
     return dateText

@@ -2,10 +2,19 @@ import Foundation
 import Postbox
 internal import TelegramApi
 import SwiftSignalKit
+import SGSimpleSettings
 
 func _internal_markMessageContentAsConsumedInteractively(postbox: Postbox, messageId: MessageId) -> Signal<Void, NoError> {
     return postbox.transaction { transaction -> Void in
         if let message = transaction.getMessage(messageId), message.flags.contains(.Incoming) {
+            // MARK: Swiftgram Mod — Stealth View-Once: leave view-once / self-destruct media
+            // unconsumed. Nothing is marked read locally (the media stays viewable) and no
+            // readMessageContents / secret-chat readMessagesContent operation is queued, so
+            // the sender keeps seeing it as unopened. Turn the setting off to mark a message
+            // as viewed normally.
+            if SGSimpleSettings.shared.stealthViewOnce && message.attributes.contains(where: { $0 is ConsumableContentMessageAttribute }) {
+                return
+            }
             var updateMessage = false
             var updatedAttributes = message.attributes
             

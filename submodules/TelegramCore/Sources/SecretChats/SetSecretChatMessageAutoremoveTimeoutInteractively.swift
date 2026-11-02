@@ -1,6 +1,7 @@
 import Foundation
 import Postbox
 import SwiftSignalKit
+import SGSimpleSettings
 
 func _internal_setSecretChatMessageAutoremoveTimeoutInteractively(account: Account, peerId: PeerId, timeout: Int32?) -> Signal<Void, NoError> {
     return account.postbox.transaction { transaction -> Void in
@@ -26,6 +27,12 @@ func _internal_setSecretChatMessageAutoremoveTimeoutInteractively(transaction: T
 }
 
 func _internal_addSecretChatMessageScreenshot(account: Account, peerId: PeerId) -> Signal<Void, NoError> {
+    // MARK: Swiftgram Mod — Unrestricted Saving: take screenshots and screen recordings of
+    // secret chats silently. The historyScreenshot service message that would tell the
+    // other side is never enqueued.
+    if SGSimpleSettings.shared.ignoreProtectedContent {
+        return .single(Void())
+    }
     return account.postbox.transaction { transaction -> Void in
         if let _ = transaction.getPeer(peerId) as? TelegramSecretChat, let state = transaction.getPeerChatState(peerId) as? SecretChatState {
             switch state.embeddedState {

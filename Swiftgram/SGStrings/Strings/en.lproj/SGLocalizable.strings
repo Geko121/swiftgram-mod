@@ -295,3 +295,18 @@
 "Settings.Mod.Ghost.Typing" = "Hide Typing Indicator";
 "Settings.Mod.Ghost.OnlineStatus" = "Hide Online Status";
 "Settings.Mod.Ghost.Notice" = "When online status is hidden you appear as last seen at the time you enabled it.";
+
+"Settings.Mod.StealthViewOnce" = "Stealth View-Once";
+"Settings.Mod.StealthViewOnce.Notice" = "Open view-once photos and videos without marking them as viewed: the sender keeps seeing them as unopened, and they stay viewable. Turn this off to leave a photo marked as viewed. Saving is handled by Unrestricted Saving.";
+"Settings.Mod.DeletedBadge" = "Deleted Message Marker";
+"Settings.Mod.DeletedBadge.Label" = "Marker Text";
+"Settings.Mod.DeletedBadge.Label.deleted" = "deleted";
+"Settings.Mod.DeletedBadge.Label.unsent" = "unsent";
+"Settings.Mod.DeletedBadge.Label.removed" = "removed";
+"Settings.Mod.DeletedBadge.Label.voided" = "voided";
+"Settings.Mod.DeletedBadge.Color" = "Marker Color";
+"Settings.Mod.DeletedBadge.Color.red" = "Red";
+"Settings.Mod.DeletedBadge.Color.orange" = "Orange";
+"Settings.Mod.DeletedBadge.Color.green" = "Green";
+"Settings.Mod.DeletedBadge.Color.gray" = "Gray";
+"Settings.Mod.DeletedBadge.Color.none" = "None (date color)";

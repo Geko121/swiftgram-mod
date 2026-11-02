@@ -1,4 +1,5 @@
 import Postbox
+import SGSimpleSettings
 
 public struct MessageReference: PostboxCoding, Hashable, Equatable {
     public let content: MessageReferenceContent
@@ -77,7 +78,11 @@ public struct MessageReference: PostboxCoding, Hashable, Equatable {
             } else {
                 author = nil
             }
-            self.content = .message(peer: inputPeer, author: author, id: message.id, timestamp: message.timestamp, incoming: message.flags.contains(.Incoming), secret: message.containsSecretMedia, threadId: message.threadId)
+            // MARK: Swiftgram Mod — Unrestricted Saving: with secret references intact,
+            // view-once and secret-chat media is held memory-only and cannot be saved.
+            // Report it as a regular reference so the decrypted media persists in the
+            // cache and the save/share paths work.
+            self.content = .message(peer: inputPeer, author: author, id: message.id, timestamp: message.timestamp, incoming: message.flags.contains(.Incoming), secret: message.containsSecretMedia && !SGSimpleSettings.shared.ignoreProtectedContent, threadId: message.threadId)
         } else {
             self.content = .none
         }

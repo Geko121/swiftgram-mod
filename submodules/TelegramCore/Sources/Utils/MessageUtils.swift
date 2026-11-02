@@ -536,6 +536,44 @@ public extension Message {
         }
     }
     
+    // MARK: Swiftgram Mod — Unrestricted Saving: gates used by UI to decide whether
+    // save/copy/share actions must be hidden. Covers noforwards protection, secret
+    // (view-once / self-destruct) media and the view-once timeout. When the setting
+    // is on, all such media behaves like regular content.
+    func isSaveRestricted() -> Bool {
+        if SGSimpleSettings.shared.ignoreProtectedContent {
+            return false
+        }
+        if self.isCopyProtected() {
+            return true
+        }
+        if self.containsSecretMedia {
+            return true
+        }
+        if self.minAutoremoveOrClearTimeout == viewOnceTimeout {
+            return true
+        }
+        return false
+    }
+
+    // MARK: Swiftgram Mod — same for forwarding, which is additionally always hidden
+    // in secret chats by stock behavior.
+    func isForwardRestricted() -> Bool {
+        if SGSimpleSettings.shared.ignoreProtectedContent {
+            return false
+        }
+        if self.id.peerId.namespace == Namespaces.Peer.SecretChat {
+            return true
+        }
+        if self.containsSecretMedia {
+            return true
+        }
+        if self.isCopyProtected() {
+            return true
+        }
+        return false
+    }
+
     func isCopyProtected() -> Bool {
         // MARK: Swiftgram Mod — unrestricted saving: when enabled, treat protected
         // content (noforwards chats and channels) as regular content. The media bytes are
