@@ -114,7 +114,8 @@ jobs:
             --configurationPath="build-system/ci-configuration.json" \
             --codesigningInformationPath=build-system/fake-codesigning \
             --configuration="$BUILD_CONFIG" \
-            --buildNumber="$BUILD_NUMBER" 2>&1 | tee build.log | tail -200
+            --buildNumber="$BUILD_NUMBER" \
+            --outputBuildArtifactsPath="build/artifacts" 2>&1 | tee build.log | tail -200
 
       - name: Save Bazel cache
         if: always()
@@ -126,26 +127,20 @@ jobs:
       - name: Collect artifacts
         run: |
           cd /Users/Shared/telegram-ios
-          mkdir -p build/artifacts
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/Telegram.ipa; do
-            cp "$f" build/artifacts/
-          done
-          mkdir -p build/DSYMs
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/*.dSYM; do
-            [ -e "$f" ] && cp -R "$f" build/DSYMs/
-          done
-          if [ -d build/DSYMs ] && [ -n "$(ls -A build/DSYMs 2>/dev/null)" ]; then
-            zip -r "./build/artifacts/Telegram.DSYMs.zip" build/DSYMs 1>/dev/null
-          fi
+          # Make.py --outputBuildArtifactsPath already placed Swiftgram.ipa (+DSYMs) here
           ls -la build/artifacts/
+          test -f build/artifacts/Swiftgram.ipa || { echo "IPA missing"; exit 1; }
+          if [ -d build/artifacts/DSYMs ] && [ -n "$(ls -A build/artifacts/DSYMs 2>/dev/null)" ]; then
+            cd build/artifacts && zip -r Swiftgram.DSYMs.zip DSYMs 1>/dev/null && cd ../..
+          fi
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: SwiftgramMod-${{ env.APP_VERSION }}-${{ env.BUILD_NUMBER }}
           path: |
-            /Users/Shared/telegram-ios/build/artifacts/*.ipa
-            /Users/Shared/telegram-ios/build/artifacts/*.zip
+            /Users/Shared/telegram-ios/build/artifacts/Swiftgram.ipa
+            /Users/Shared/telegram-ios/build/artifacts/Swiftgram.DSYMs.zip
           if-no-files-found: error
 
       - name: Release (tag builds only)
@@ -154,7 +149,7 @@ jobs:
         with:
           name: Swiftgram Mod ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
           files: |
-            /Users/Shared/telegram-ios/build/artifacts/*.ipa
+            /Users/Shared/telegram-ios/build/artifacts/Swiftgram.ipa
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
