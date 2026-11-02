@@ -715,9 +715,18 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
             networkEngineFactory: RustNetworkEngineFactory()
         )
         
-        guard let appGroupUrl = maybeAppGroupUrl else {
-            self.mainWindow?.presentNative(UIAlertController(title: nil, message: "Error 2", preferredStyle: .alert))
-            return true
+        // MARK: Swiftgram Mod — sideload support
+        // Cert-store signing tools (FlareStore, E-Sign, Scarlet, Sideloadly with a free
+        // Apple ID) cannot provision the app group this build was compiled for:
+        // containerURL returns nil and upstream aborts here, presenting an alert on a
+        // window that has not rendered yet — which looks like a permanent black screen.
+        // Fall back to a sandbox-local container and keep running.
+        let appGroupUrl: URL
+        if let maybeAppGroupUrl = maybeAppGroupUrl {
+            appGroupUrl = maybeAppGroupUrl
+        } else {
+            appGroupUrl = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("group-container", isDirectory: true)
+            try? FileManager.default.createDirectory(at: appGroupUrl, withIntermediateDirectories: true, attributes: nil)
         }
         
         var isDebugConfiguration = false
