@@ -14,6 +14,11 @@ on:
     tags:
       - 'v*'
 
+# Tag builds publish the IPA as a release, which needs write access to contents
+# (new repositories give GITHUB_TOKEN read-only access by default).
+permissions:
+  contents: write
+
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
