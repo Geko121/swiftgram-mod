@@ -11,6 +11,7 @@ swift_library(
     ],
     deps = [
         "//submodules/TelegramCore:TelegramCore",
+        "//Swiftgram/SGSimpleSettings:SGSimpleSettings", # MARK: Swiftgram Mod
     ],
     visibility = [
         "//visibility:public",

@@ -17,6 +17,15 @@ boosts, translator, voice-to-text, session backup, 50+ settings…) **plus**:
 | **Ghost mode — read receipts** | off | Read messages without the server telling the other side. |
 | **Ghost mode — typing indicator** | off | Never send "typing…" to anyone. |
 | **Ghost mode — online status** | off | Never report yourself online; you appear as last-seen. |
+| **Ghost mode — master switch** | off | One toggle for read receipts, typing, online status and story stealth together. |
+| **Send Read Receipt** | with ghost reads | Long-press an incoming message → *Send Read Receipt* marks just that chat as read on the server while ghost mode stays on everywhere else. |
+| **Stealth view-once & listened** | on | Opening view-once media or playing voice/video messages doesn't mark them viewed/listened for the sender. |
+| **Deleted-message marker** | on | Kept deleted messages show a configurable "deleted" label (text + color). |
+| **Edit history** | on | Previous versions of edited messages are kept. Long-press → *Edit History* lists every version with its time; tap one to copy it. |
+| **Message details** | always | Long-press → Swiftgram → *Details*: message/chat/author IDs (Bot API form), sent/edited/deleted/forwarded times to the second. Tap to copy. |
+| **Save any story** | with Unrestricted Saving | *Save to Gallery* for every story, including protected ones, without Premium. |
+| **Bypass iOS-only restrictions** | off | Shows channels, bots and messages hidden only on iOS by App Store rules (as Desktop/Web show them). Restrictions for all platforms stay. |
+| **Hide sponsored messages** | off | Never loads channel/video ads. Off by default: Telegram's API terms require clients to show them. |
 
 All toggles live in **Settings → Swiftgram → MOD FEATURES** (bottom of the list).
 
@@ -30,6 +39,15 @@ All toggles live in **Settings → Swiftgram → MOD FEATURES** (bottom of the l
 | Ghost read receipts | `submodules/TelegramCore/Sources/State/SynchronizePeerReadState.swift` |
 | Ghost typing | `submodules/TelegramCore/Sources/State/ManagedLocalInputActivities.swift` |
 | Ghost online | `submodules/TelegramCore/Sources/State/ManagedAccountPresence.swift` |
+| Send Read Receipt | `submodules/TelegramCore/Sources/State/SynchronizePeerReadState.swift` (`sgPushPeerReadState`), `Swiftgram/SGTelegramUIExtensions/Sources/SGModContextMenu.swift` |
+| Stealth view-once | `submodules/TelegramCore/Sources/TelegramEngine/Messages/MarkMessageContentAsConsumedInteractively.swift` |
+| Deleted marker | `SyncCore_SGDeletedMessageAttribute.swift`, `AccountStateManagementUtils.swift`, `StringForMessageTimestampStatus.swift`, `ChatMessageDateAndStatusNode.swift` |
+| Edit history | `submodules/TelegramCore/Sources/SyncCore/SyncCore_SGEditHistoryAttribute.swift`, `submodules/TelegramCore/Sources/State/ServerMessageMerge.swift`, `Swiftgram/SGTelegramUIExtensions/Sources/SGModContextMenu.swift` |
+| Mod attribute registration | `submodules/TelegramCore/Sources/Account/AccountManager.swift` (`declareEncodable`) |
+| Message details | `Swiftgram/SGTelegramUIExtensions/Sources/SGModContextMenu.swift`, `submodules/TelegramUI/Sources/ChatInterfaceStateContextMenus.swift` |
+| Save any story | `submodules/TelegramUI/Components/Stories/StoryContainerScreen/Sources/StoryItemSetContainerComponent.swift` |
+| iOS restriction bypass | `submodules/TelegramCore/Sources/Utils/PeerUtils.swift` (`restrictionText`), `submodules/PlatformRestrictionMatching/Sources/PlatformRestrictionMatching.swift` |
+| Hide sponsored | `submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift` |
 | Settings UI | `Swiftgram/SGSettingsUI/Sources/SGSettingsController.swift`, `Swiftgram/SGStrings/Strings/en.lproj/SGLocalizable.strings` |
 
 All mods are tagged `// MARK: Swiftgram Mod` in the source.
@@ -95,6 +113,11 @@ git merge upstream/master             # resolve conflicts near the MARK: Swiftgr
   corresponding source — this repo is that source; publish it.
 - Use your own api_id (that's what the secrets are for); don't share it.
 - The app is unofficial. Don't call it "Telegram".
+- [Telegram's API terms](https://core.telegram.org/api/terms) forbid ghost mode (hiding read
+  receipts, typing or online status), interfering with sponsored messages, and keeping
+  self-destructing content from disappearing. If Telegram detects a violation it can revoke the
+  api_id's API access after a 10-day notice. Keep the api_id private, and turn those toggles on
+  knowing that risk.
 
 ## Credits
 

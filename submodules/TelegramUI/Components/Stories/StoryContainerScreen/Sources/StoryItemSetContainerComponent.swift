@@ -7449,10 +7449,12 @@ public final class StoryItemSetContainerComponent: Component {
                             }
                             self.beginPictureInPicture()
                         })))
-                    } else if !component.slice.item.storyItem.isForwardingDisabled {
+                    } else if !component.slice.item.storyItem.isForwardingDisabled || SGSimpleSettings.shared.ignoreProtectedContent { // MARK: Swiftgram Mod — Unrestricted Saving covers stories
+                        // MARK: Swiftgram Mod — Unrestricted Saving: save any story, no Premium needed
+                        let sgCanSave = accountUser.isPremium || SGSimpleSettings.shared.ignoreProtectedContent
                         let saveText: String = component.strings.Story_Context_SaveToGallery
                         items.append(.action(ContextMenuActionItem(text: saveText, icon: { theme in
-                            return generateTintedImage(image: UIImage(bundleImageName: accountUser.isPremium ? "Chat/Context Menu/Download" : "Chat/Context Menu/DownloadLocked"), color: theme.contextMenu.primaryColor)
+                            return generateTintedImage(image: UIImage(bundleImageName: sgCanSave ? "Chat/Context Menu/Download" : "Chat/Context Menu/DownloadLocked"), color: theme.contextMenu.primaryColor)
                         }, action: { [weak self] _, a in
                             a(.default)
                             
@@ -7460,7 +7462,7 @@ public final class StoryItemSetContainerComponent: Component {
                                 return
                             }
                             
-                            if accountUser.isPremium {
+                            if sgCanSave {
                                 self.requestSave()
                             } else {
                                 self.presentSaveUpgradeScreen()

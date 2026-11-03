@@ -70,6 +70,7 @@ swift_library(
         # InstantPageButtonLinkStyleTests round-trips through the flatc-generated TelegramCore_* types.
         "//submodules/TelegramCore/FlatBuffers",
         "//submodules/TelegramCore/FlatSerialization",
+        "//Swiftgram/SGSimpleSettings:SGSimpleSettings", # MARK: Swiftgram Mod — ServerMessageMergeTests toggle edit history
     ],
 )
 

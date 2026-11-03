@@ -463,3 +463,13 @@ func synchronizePeerReadState(network: Network, postbox: Postbox, stateManager: 
         return signal
     }
 }
+
+// MARK: Swiftgram Mod — Ghost Mode "Send Read Receipt": push one chat's local read state to the
+// server on request, even while read receipts are hidden. Errors are dropped: this is a one-off,
+// and the regular synchronizer stays suppressed by the ghost setting either way.
+public func sgPushPeerReadState(account: Account, peerId: PeerId) -> Signal<Never, NoError> {
+    return pushPeerReadState(network: account.network, postbox: account.postbox, stateManager: account.stateManager, peerId: peerId, willValidate: false)
+    |> `catch` { _ -> Signal<Never, NoError> in
+        return .complete()
+    }
+}

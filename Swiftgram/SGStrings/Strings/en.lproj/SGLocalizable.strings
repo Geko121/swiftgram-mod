@@ -291,13 +291,13 @@
 "Settings.Mod.IgnoreProtected.Notice" = "Ignore \"protected content\" restrictions: save, forward and copy media in chats and channels that disable it. Screenshots are also allowed in those chats.";
 "Settings.Mod.Ghost.Header" = "GHOST MODE";
 "Settings.Mod.Ghost.ReadReceipts" = "Hide Read Receipts";
-"Settings.Mod.Ghost.ReadReceipts.Notice" = "Read messages without the server telling the other side. Unread counts on your other devices will lag behind.";
+"Settings.Mod.Ghost.ReadReceipts.Notice" = "Read messages without the server telling the other side. Unread counts on your other devices will lag behind. To mark one chat as read, long-press an incoming message and choose Send Read Receipt.";
 "Settings.Mod.Ghost.Typing" = "Hide Typing Indicator";
 "Settings.Mod.Ghost.OnlineStatus" = "Hide Online Status";
 "Settings.Mod.Ghost.Notice" = "When online status is hidden you appear as last seen at the time you enabled it.";
 
 "Settings.Mod.StealthViewOnce" = "Stealth View-Once";
-"Settings.Mod.StealthViewOnce.Notice" = "Open view-once photos and videos without marking them as viewed: the sender keeps seeing them as unopened, and they stay viewable. Turn this off to leave a photo marked as viewed. Saving is handled by Unrestricted Saving.";
+"Settings.Mod.StealthViewOnce.Notice" = "Open view-once photos and videos, and play voice and video messages, without marking them as viewed or listened: the sender keeps seeing them as unopened, and view-once media stays viewable. Turn this off to mark something as viewed. Saving is handled by Unrestricted Saving.";
 "Settings.Mod.DeletedBadge" = "Deleted Message Marker";
 "Settings.Mod.DeletedBadge.Label" = "Marker Text";
 "Settings.Mod.DeletedBadge.Label.deleted" = "deleted";
@@ -310,3 +310,31 @@
 "Settings.Mod.DeletedBadge.Color.green" = "Green";
 "Settings.Mod.DeletedBadge.Color.gray" = "Gray";
 "Settings.Mod.DeletedBadge.Color.none" = "None (date color)";
+"Settings.Mod.EditHistory" = "Save Edit History";
+"Settings.Mod.EditHistory.Notice" = "Keep the previous versions of edited messages. Long-press an edited message and choose Edit History to see and copy them. Only edits received while this is on are recorded.";
+"Settings.Mod.BypassRestrictions" = "Bypass iOS-Only Restrictions";
+"Settings.Mod.BypassRestrictions.Notice" = "Show channels, bots and messages that are hidden only in iOS apps because of App Store rules, the same way Telegram Desktop and Web show them. Restrictions that apply on every platform stay in place. Reopen chats or restart the app to apply everywhere.";
+"Settings.Mod.HideSponsored" = "Hide Sponsored Messages";
+"Settings.Mod.HideSponsored.Notice" = "Don't load or show sponsored messages in channels and video ads. Telegram's API terms require clients to show sponsored messages, so this is off by default.";
+"Settings.Mod.Ghost.All" = "Ghost Mode";
+"Settings.Mod.Ghost.All.Notice" = "Turns all of the options below on or off at once, together with story stealth mode.";
+
+"ContextMenu.EditHistory" = "Edit History";
+"EditHistory.Versions" = "%@ versions";
+"EditHistory.Original" = "Original";
+"EditHistory.Edited" = "Edited";
+"EditHistory.Current" = "Current";
+"EditHistory.NoText" = "(no text)";
+"ContextMenu.SendReadReceipt" = "Send Read Receipt";
+"ContextMenu.SendReadReceipt.Done" = "Read receipt sent for this chat.";
+"ContextMenu.MessageDetails" = "Details";
+"MessageDetails.MessageId" = "Message ID";
+"MessageDetails.ChatId" = "Chat ID";
+"MessageDetails.AuthorId" = "Author ID";
+"MessageDetails.Sent" = "Sent";
+"MessageDetails.Edited" = "Edited";
+"MessageDetails.SavedVersions" = "Saved versions";
+"MessageDetails.Deleted" = "Deleted";
+"MessageDetails.ForwardedDate" = "Originally sent";
+"MessageDetails.ForwardedFrom" = "Forwarded from ID";
+"MessageDetails.AlbumId" = "Album ID";

@@ -1587,6 +1587,14 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
         } else {
             sgActions.append(showJsonAction)
         }
+        // MARK: Swiftgram Mod — edit history, ghost mode read receipt, message details
+        if let editHistoryAction = sgMakeEditHistoryContextMenuAction(chatPresentationInterfaceState: chatPresentationInterfaceState, controllerInteraction: controllerInteraction, message: message) {
+            actions.append(editHistoryAction)
+        }
+        if let sendReadReceiptAction = sgMakeSendReadReceiptContextMenuAction(context: context, chatPresentationInterfaceState: chatPresentationInterfaceState, controllerInteraction: controllerInteraction, message: message) {
+            actions.append(sendReadReceiptAction)
+        }
+        sgActions.append(sgMakeMessageDetailsContextMenuAction(chatPresentationInterfaceState: chatPresentationInterfaceState, controllerInteraction: controllerInteraction, message: message))
         //
         
         var threadId: Int64?

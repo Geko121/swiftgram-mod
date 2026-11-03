@@ -224,6 +224,9 @@ private var declaredEncodables: Void = {
     declareEncodable(TranslationMessageAttribute.self, f: { TranslationMessageAttribute(decoder: $0) })
     declareEncodable(TranslationMessageAttribute.Additional.self, f: { TranslationMessageAttribute.Additional(decoder: $0) })
     declareEncodable(QuickTranslationMessageAttribute.self, f: { QuickTranslationMessageAttribute(decoder: $0) }) // MARK: Swiftgram
+    // MARK: Swiftgram Mod — without these the attributes are dropped when a message is read back from the database
+    declareEncodable(SGDeletedMessageAttribute.self, f: { SGDeletedMessageAttribute(decoder: $0) })
+    declareEncodable(SGEditHistoryAttribute.self, f: { SGEditHistoryAttribute(decoder: $0) })
     declareEncodable(SynchronizeAutosaveItemOperation.self, f: { SynchronizeAutosaveItemOperation(decoder: $0) })
     declareEncodable(TelegramMediaStory.self, f: { TelegramMediaStory(decoder: $0) })
     declareEncodable(SynchronizeViewStoriesOperation.self, f: { SynchronizeViewStoriesOperation(decoder: $0) })
