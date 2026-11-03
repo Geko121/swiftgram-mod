@@ -189,6 +189,9 @@ public class SGSimpleSettings {
         case showDeletedBadge
         case deletedBadgeText
         case deletedBadgeColor
+        case saveEditHistory
+        case bypassIOSRestrictions
+        case hideSponsoredMessages
     }
     
     public enum DownloadSpeedBoostValues: String, CaseIterable {
@@ -362,6 +365,9 @@ public class SGSimpleSettings {
         Keys.showDeletedBadge.rawValue: true,
         Keys.deletedBadgeText.rawValue: "deleted",
         Keys.deletedBadgeColor.rawValue: "red",
+        Keys.saveEditHistory.rawValue: true,
+        Keys.bypassIOSRestrictions.rawValue: false,
+        Keys.hideSponsoredMessages.rawValue: false,
         Keys.showRepostToStoryV2.rawValue: true,
         Keys.hideAccountInNotifications.rawValue: false,
     ]
@@ -602,6 +608,15 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.deletedBadgeColor.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
     public var deletedBadgeColor: String
+
+    @UserDefault(key: Keys.saveEditHistory.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var saveEditHistory: Bool
+
+    @UserDefault(key: Keys.bypassIOSRestrictions.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var bypassIOSRestrictions: Bool
+
+    @UserDefault(key: Keys.hideSponsoredMessages.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var hideSponsoredMessages: Bool
     
     @UserDefault(key: Keys.messageFilterKeywords.rawValue)
     public var messageFilterKeywords: [String]

@@ -1,5 +1,6 @@
 import Foundation
 import Postbox
+import SGSimpleSettings
 
 /// The server's copy of a message the account already stores, keeping what the server's copy does not carry:
 /// the outgoing live-location tag, the stored Incoming flag, a translation while the text and entities are
@@ -34,6 +35,25 @@ func mergedServerMessageUpdate(previous previousMessage: Message, updated messag
             updatedAttributes.removeAll(where: { $0 is FactCheckMessageAttribute })
             updatedAttributes.append(previousFactCheckAttribute)
         }
+    }
+
+    // MARK: Swiftgram Mod — the server copy doesn't carry the local-only mod attributes:
+    // keep the anti-revoke marker and the edit history, and record the replaced text as a
+    // new history entry when this update is an edit that changed it.
+    if let deletedAttribute = previousMessage.attributes.first(where: { $0 is SGDeletedMessageAttribute }), !updatedAttributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+        updatedAttributes.append(deletedAttribute)
+    }
+    var editHistory = (previousMessage.attributes.first(where: { $0 is SGEditHistoryAttribute }) as? SGEditHistoryAttribute)?.entries ?? []
+    if SGSimpleSettings.shared.saveEditHistory && previousMessage.text != message.text && message.attributes.contains(where: { $0 is EditedMessageAttribute }) {
+        let previousVersionDate = (previousMessage.attributes.first(where: { $0 is EditedMessageAttribute }) as? EditedMessageAttribute)?.date ?? previousMessage.timestamp
+        editHistory.append(SGEditHistoryAttribute.Entry(text: previousMessage.text, date: previousVersionDate))
+        if editHistory.count > SGEditHistoryAttribute.maxEntries {
+            editHistory.removeFirst(editHistory.count - SGEditHistoryAttribute.maxEntries)
+        }
+    }
+    if !editHistory.isEmpty {
+        updatedAttributes.removeAll(where: { $0 is SGEditHistoryAttribute })
+        updatedAttributes.append(SGEditHistoryAttribute(entries: editHistory))
     }
 
     var updatedMedia = message.media

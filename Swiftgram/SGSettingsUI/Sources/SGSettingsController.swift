@@ -116,6 +116,10 @@ private enum SGBoolSetting: String {
     case ghostOnlineStatus
     case stealthViewOnce
     case showDeletedBadge
+    case saveEditHistory
+    case bypassIOSRestrictions
+    case hideSponsoredMessages
+    case ghostModeAll
 }
 
 private enum SGOneFromManySetting: String {
@@ -355,7 +359,16 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.toggle(id: id.count, section: .mod, settingName: .showDeletedBadge, value: SGSimpleSettings.shared.showDeletedBadge, text: i18n("Settings.Mod.DeletedBadge", lang), enabled: true))
     entries.append(.oneFromManySelector(id: id.count, section: .mod, settingName: .deletedBadgeText, text: i18n("Settings.Mod.DeletedBadge.Label", lang), value: i18n("Settings.Mod.DeletedBadge.Label.\(SGSimpleSettings.shared.deletedBadgeText)", lang), enabled: SGSimpleSettings.shared.showDeletedBadge))
     entries.append(.oneFromManySelector(id: id.count, section: .mod, settingName: .deletedBadgeColor, text: i18n("Settings.Mod.DeletedBadge.Color", lang), value: i18n("Settings.Mod.DeletedBadge.Color.\(SGSimpleSettings.shared.deletedBadgeColor)", lang), enabled: SGSimpleSettings.shared.showDeletedBadge))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .saveEditHistory, value: SGSimpleSettings.shared.saveEditHistory, text: i18n("Settings.Mod.EditHistory", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.EditHistory.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .bypassIOSRestrictions, value: SGSimpleSettings.shared.bypassIOSRestrictions, text: i18n("Settings.Mod.BypassRestrictions", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.BypassRestrictions.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .hideSponsoredMessages, value: SGSimpleSettings.shared.hideSponsoredMessages, text: i18n("Settings.Mod.HideSponsored", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.HideSponsored.Notice", lang)))
     entries.append(.header(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.Header", lang), badge: nil))
+    let sgGhostModeAll = SGSimpleSettings.shared.ghostReadReceipts && SGSimpleSettings.shared.ghostTyping && SGSimpleSettings.shared.ghostOnlineStatus && SGSimpleSettings.shared.storyStealthMode
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostModeAll, value: sgGhostModeAll, text: i18n("Settings.Mod.Ghost.All", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.All.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostReadReceipts, value: SGSimpleSettings.shared.ghostReadReceipts, text: i18n("Settings.Mod.Ghost.ReadReceipts", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.ReadReceipts.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostTyping, value: SGSimpleSettings.shared.ghostTyping, text: i18n("Settings.Mod.Ghost.Typing", lang), enabled: true))
@@ -445,6 +458,7 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
             SGSimpleSettings.shared.sendLargePhotos = value
         case .storyStealthMode:
             SGSimpleSettings.shared.storyStealthMode = value
+            simplePromise.set(true) // MARK: Swiftgram Mod — refresh the Ghost Mode master toggle
         case .disableSwipeToRecordStory:
             SGSimpleSettings.shared.disableSwipeToRecordStory = value
         case .quickTranslateButton:
@@ -573,12 +587,28 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
         case .ghostReadReceipts:
             SGSimpleSettings.shared.ghostReadReceipts = value
             SGSimpleSettings.shared.synchronizeShared()
+            simplePromise.set(true) // Refresh the Ghost Mode master toggle
         case .ghostTyping:
             SGSimpleSettings.shared.ghostTyping = value
             SGSimpleSettings.shared.synchronizeShared()
+            simplePromise.set(true) // Refresh the Ghost Mode master toggle
         case .ghostOnlineStatus:
             SGSimpleSettings.shared.ghostOnlineStatus = value
             SGSimpleSettings.shared.synchronizeShared()
+            simplePromise.set(true) // Refresh the Ghost Mode master toggle
+        case .saveEditHistory:
+            SGSimpleSettings.shared.saveEditHistory = value
+        case .bypassIOSRestrictions:
+            SGSimpleSettings.shared.bypassIOSRestrictions = value
+        case .hideSponsoredMessages:
+            SGSimpleSettings.shared.hideSponsoredMessages = value
+        case .ghostModeAll:
+            SGSimpleSettings.shared.ghostReadReceipts = value
+            SGSimpleSettings.shared.ghostTyping = value
+            SGSimpleSettings.shared.ghostOnlineStatus = value
+            SGSimpleSettings.shared.storyStealthMode = value
+            SGSimpleSettings.shared.synchronizeShared()
+            simplePromise.set(true) // Refresh the individual ghost toggles
         }
     }, updateSliderValue: { setting, value in
         switch (setting) {

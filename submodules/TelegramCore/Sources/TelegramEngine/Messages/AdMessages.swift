@@ -1,6 +1,7 @@
 import Foundation
 import Postbox
 import SwiftSignalKit
+import SGSimpleSettings
 internal import TelegramApi
 
 private class AdMessagesHistoryContextImpl {
@@ -451,7 +452,11 @@ private class AdMessagesHistoryContextImpl {
 
         self.stateValue = State(interPostInterval: nil, messages: [])
 
-        if messageId == nil {
+        // MARK: Swiftgram Mod — Hide Sponsored Messages: publish an empty state right away
+        // (consumers combine with it, so it has to emit); activate() doesn't fetch
+        if SGSimpleSettings.shared.hideSponsoredMessages {
+            self.state.set(.single(State(interPostInterval: nil, messages: [])))
+        } else if messageId == nil {
             self.state.set(CachedState.getCached(postbox: account.postbox, peerId: peerId)
             |> mapToSignal { cachedState -> Signal<State, NoError> in
                 if let cachedState = cachedState, cachedState.timestamp >= Int32(Date().timeIntervalSince1970) - 5 * 60 {
@@ -481,6 +486,11 @@ private class AdMessagesHistoryContextImpl {
             return
         }
         self.isActivated = true
+        
+        // MARK: Swiftgram Mod — Hide Sponsored Messages: never request channel / video ads
+        if SGSimpleSettings.shared.hideSponsoredMessages {
+            return
+        }
         
         let peerId = self.peerId
         let accountPeerId = self.account.peerId

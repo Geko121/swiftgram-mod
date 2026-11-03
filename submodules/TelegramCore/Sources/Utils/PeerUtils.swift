@@ -31,9 +31,13 @@ public extension Peer {
             break
         }
         
+        // MARK: Swiftgram Mod — bypass iOS-only restrictions: drop the App Store specific
+        // rules (Swiftgram's forced list and rules for this platform only). Rules for "all"
+        // platforms still apply, as they do in every other client.
+        let sgBypassPlatformRestrictions = SGSimpleSettings.shared.bypassIOSRestrictions
         // MARK: Swiftgram
         let chatId = self.id.id._internalGetInt64Value()
-        if contentSettings.appConfiguration.sgWebSettings.global.forceReasons.contains(chatId) {
+        if !sgBypassPlatformRestrictions && contentSettings.appConfiguration.sgWebSettings.global.forceReasons.contains(chatId) {
             return "Unavailable in Swiftgram due to App Store Guidelines"
         } else if contentSettings.appConfiguration.sgWebSettings.global.unforceReasons.contains(chatId) {
             return nil
@@ -43,7 +47,7 @@ public extension Peer {
                 if rule.reason == "sensitive" {
                     continue
                 }
-                if rule.platform == "all" || rule.platform == platform || contentSettings.addContentRestrictionReasons.contains(rule.platform) {
+                if rule.platform == "all" || (!sgBypassPlatformRestrictions && rule.platform == platform) || contentSettings.addContentRestrictionReasons.contains(rule.platform) {
                     if !contentSettings.ignoreContentRestrictionReasons.contains(rule.reason) {
                         return rule.text + "\n" + "\(rule.reason)-\(rule.platform)"
                     }
