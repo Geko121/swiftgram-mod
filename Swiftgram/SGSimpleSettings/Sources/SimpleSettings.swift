@@ -192,6 +192,7 @@ public class SGSimpleSettings {
         case saveEditHistory
         case bypassIOSRestrictions
         case hideSponsoredMessages
+        case hideBlockedUsers
     }
     
     public enum DownloadSpeedBoostValues: String, CaseIterable {
@@ -368,6 +369,7 @@ public class SGSimpleSettings {
         Keys.saveEditHistory.rawValue: true,
         Keys.bypassIOSRestrictions.rawValue: false,
         Keys.hideSponsoredMessages.rawValue: false,
+        Keys.hideBlockedUsers.rawValue: true,
         Keys.showRepostToStoryV2.rawValue: true,
         Keys.hideAccountInNotifications.rawValue: false,
     ]
@@ -617,6 +619,9 @@ public class SGSimpleSettings {
 
     @UserDefault(key: Keys.hideSponsoredMessages.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
     public var hideSponsoredMessages: Bool
+
+    @UserDefault(key: Keys.hideBlockedUsers.rawValue, userDefaults: UserDefaults(suiteName: APP_GROUP_IDENTIFIER) ?? .standard)
+    public var hideBlockedUsers: Bool
     
     @UserDefault(key: Keys.messageFilterKeywords.rawValue)
     public var messageFilterKeywords: [String]

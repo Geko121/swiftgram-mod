@@ -35,6 +35,7 @@ swift_library(
         "//submodules/AppBundle:AppBundle",
         "//submodules/TelegramUI/Components/Settings/PeerNameColorScreen",
         "//submodules/UndoUI:UndoUI",
+        "//submodules/LocalizedPeerData:LocalizedPeerData", # MARK: Swiftgram Mod — Deleted Messages Log
     ],
     visibility = [
         "//visibility:public",
