@@ -338,3 +338,24 @@
 "MessageDetails.ForwardedDate" = "Originally sent";
 "MessageDetails.ForwardedFrom" = "Forwarded from ID";
 "MessageDetails.AlbumId" = "Album ID";
+
+"Settings.Mod.HideBlocked" = "Hide Blocked Users in Groups";
+"Settings.Mod.HideBlocked.Notice" = "Messages from people you've blocked are left out of group chats and comments. Private chats with them keep their history. Reopen a chat to apply.";
+"DeletedLog.Title" = "Deleted Messages Log";
+"DeletedLog.Info" = "Messages that others deleted, kept by Keep Deleted Messages, newest first. Tap one to open it in its chat. The log keeps the last 2,000.";
+"DeletedLog.Empty" = "No deleted messages yet.";
+"DeletedLog.UnknownChat" = "Unknown chat";
+"DeletedLog.NoText" = "(no text)";
+"DeletedLog.Clear" = "Clear Log";
+"DeletedLog.Clear.Confirm" = "Clear the log? The kept messages stay in their chats.";
+"DeletedLog.Media.photo" = "Photo";
+"DeletedLog.Media.video" = "Video";
+"DeletedLog.Media.round" = "Video Message";
+"DeletedLog.Media.voice" = "Voice Message";
+"DeletedLog.Media.audio" = "Audio";
+"DeletedLog.Media.gif" = "GIF";
+"DeletedLog.Media.sticker" = "Sticker";
+"DeletedLog.Media.file" = "File";
+"DeletedLog.Media.poll" = "Poll";
+"DeletedLog.Media.location" = "Location";
+"DeletedLog.Media.contact" = "Contact";

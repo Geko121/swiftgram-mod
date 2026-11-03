@@ -21,6 +21,8 @@ boosts, translator, voice-to-text, session backup, 50+ settings…) **plus**:
 | **Send Read Receipt** | with ghost reads | Long-press an incoming message → *Send Read Receipt* marks just that chat as read on the server while ghost mode stays on everywhere else. |
 | **Stealth view-once & listened** | on | Opening view-once media or playing voice/video messages doesn't mark them viewed/listened for the sender. |
 | **Deleted-message marker** | on | Kept deleted messages show a configurable "deleted" label (text + color). |
+| **Deleted messages log** | always | Settings → Swiftgram → *Deleted Messages Log*: every kept deleted message across all chats, newest first (chat, sender, time, text or media type). Tap to jump to it. Last 2,000 kept. |
+| **Hide blocked users in groups** | on | Messages from people you've blocked are left out of groups and comments (Telegram normally only blocks their DMs). Private chats keep their history. |
 | **Edit history** | on | Previous versions of edited messages are kept. Long-press → *Edit History* lists every version with its time; tap one to copy it. |
 | **Message details** | always | Long-press → Swiftgram → *Details*: message/chat/author IDs (Bot API form), sent/edited/deleted/forwarded times to the second. Tap to copy. |
 | **Save any story** | with Unrestricted Saving | *Save to Gallery* for every story, including protected ones, without Premium. |
@@ -48,6 +50,8 @@ All toggles live in **Settings → Swiftgram → MOD FEATURES** (bottom of the l
 | Save any story | `submodules/TelegramUI/Components/Stories/StoryContainerScreen/Sources/StoryItemSetContainerComponent.swift` |
 | iOS restriction bypass | `submodules/TelegramCore/Sources/Utils/PeerUtils.swift` (`restrictionText`), `submodules/PlatformRestrictionMatching/Sources/PlatformRestrictionMatching.swift` |
 | Hide sponsored | `submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift` |
+| Deleted messages log | `submodules/TelegramCore/Sources/TelegramEngine/SGMod/SGDeletedMessagesLog.swift` (store, written from `sgMarkMessagesAsDeleted` in `AccountStateManagementUtils.swift`), `Swiftgram/SGSettingsUI/Sources/SGDeletedMessagesLogController.swift` (screen) |
+| Hide blocked users | `submodules/TelegramCore/Sources/TelegramEngine/SGMod/SGBlockedPeers.swift` (blocked set: `contacts.getBlocked` once per launch + `updatePeerBlocked` + `BlockedPeers.swift` / `BlockedPeersContext.swift`), `submodules/TelegramUI/Sources/ChatHistoryListNode.swift` + `ChatHistoryEntriesForView.swift` (filter) |
 | Settings UI | `Swiftgram/SGSettingsUI/Sources/SGSettingsController.swift`, `Swiftgram/SGStrings/Strings/en.lproj/SGLocalizable.strings` |
 
 All mods are tagged `// MARK: Swiftgram Mod` in the source.

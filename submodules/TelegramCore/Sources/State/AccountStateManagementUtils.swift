@@ -18,6 +18,7 @@ private func sgMarkMessagesAsDeleted(postbox: Postbox, messageIds: [MessageId]) 
         for id in messageIds {
             if let message = transaction.getMessage(id) {
                 if !message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+                    sgAddDeletedMessagesLogEntry(transaction: transaction, message: message, deletedDate: timestamp)
                     transaction.updateMessage(id, update: { current in
                         var storeForwardInfo: StoreMessageForwardInfo?
                         if let forwardInfo = current.forwardInfo {
@@ -41,6 +42,7 @@ private func sgMarkMessagesAsDeletedWithGlobalIds(postbox: Postbox, globalIds: [
         for id in messageIds {
             if let message = transaction.getMessage(id) {
                 if !message.attributes.contains(where: { $0 is SGDeletedMessageAttribute }) {
+                    sgAddDeletedMessagesLogEntry(transaction: transaction, message: message, deletedDate: timestamp)
                     transaction.updateMessage(id, update: { current in
                         var storeForwardInfo: StoreMessageForwardInfo?
                         if let forwardInfo = current.forwardInfo {
@@ -1564,6 +1566,7 @@ private func finalStateWithUpdatesAndServerTime(accountPeerId: PeerId, postbox: 
                 }
             case let .updatePeerBlocked(updatePeerBlockedData):
                 let userPeerId = updatePeerBlockedData.peerId.peerId
+                SGBlockedPeers.shared.update(accountPeerId: accountPeerId, peerId: userPeerId, isBlocked: (updatePeerBlockedData.flags & (1 << 0)) != 0) // MARK: Swiftgram Mod — Hide Blocked Users
                 updatedState.updateCachedPeerData(userPeerId, { current in
                     let previous: CachedUserData
                     if let current = current as? CachedUserData {

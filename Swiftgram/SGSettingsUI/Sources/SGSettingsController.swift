@@ -120,6 +120,7 @@ private enum SGBoolSetting: String {
     case bypassIOSRestrictions
     case hideSponsoredMessages
     case ghostModeAll
+    case hideBlockedUsers
 }
 
 private enum SGOneFromManySetting: String {
@@ -144,6 +145,7 @@ private enum SGSliderSetting: String {
 private enum SGDisclosureLink: String {
     case contentSettings
     case languageSettings
+    case deletedMessagesLog // MARK: Swiftgram Mod
 }
 
 private struct PeerNameColorScreenState: Equatable {
@@ -352,6 +354,7 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.header(id: id.count, section: .mod, text: i18n("Settings.Mod.Header", lang), badge: nil))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .keepDeletedMessages, value: SGSimpleSettings.shared.keepDeletedMessages, text: i18n("Settings.Mod.KeepDeleted", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.KeepDeleted.Notice", lang)))
+    entries.append(.disclosure(id: id.count, section: .mod, link: .deletedMessagesLog, text: i18n("DeletedLog.Title", lang)))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .ignoreProtectedContent, value: SGSimpleSettings.shared.ignoreProtectedContent, text: i18n("Settings.Mod.IgnoreProtected", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.IgnoreProtected.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .stealthViewOnce, value: SGSimpleSettings.shared.stealthViewOnce, text: i18n("Settings.Mod.StealthViewOnce", lang), enabled: true))
@@ -365,6 +368,8 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.BypassRestrictions.Notice", lang)))
     entries.append(.toggle(id: id.count, section: .mod, settingName: .hideSponsoredMessages, value: SGSimpleSettings.shared.hideSponsoredMessages, text: i18n("Settings.Mod.HideSponsored", lang), enabled: true))
     entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.HideSponsored.Notice", lang)))
+    entries.append(.toggle(id: id.count, section: .mod, settingName: .hideBlockedUsers, value: SGSimpleSettings.shared.hideBlockedUsers, text: i18n("Settings.Mod.HideBlocked", lang), enabled: true))
+    entries.append(.notice(id: id.count, section: .mod, text: i18n("Settings.Mod.HideBlocked.Notice", lang)))
     entries.append(.header(id: id.count, section: .mod, text: i18n("Settings.Mod.Ghost.Header", lang), badge: nil))
     let sgGhostModeAll = SGSimpleSettings.shared.ghostReadReceipts && SGSimpleSettings.shared.ghostTyping && SGSimpleSettings.shared.ghostOnlineStatus && SGSimpleSettings.shared.storyStealthMode
     entries.append(.toggle(id: id.count, section: .mod, settingName: .ghostModeAll, value: sgGhostModeAll, text: i18n("Settings.Mod.Ghost.All", lang), enabled: true))
@@ -602,6 +607,8 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
             SGSimpleSettings.shared.bypassIOSRestrictions = value
         case .hideSponsoredMessages:
             SGSimpleSettings.shared.hideSponsoredMessages = value
+        case .hideBlockedUsers:
+            SGSimpleSettings.shared.hideBlockedUsers = value
         case .ghostModeAll:
             SGSimpleSettings.shared.ghostReadReceipts = value
             SGSimpleSettings.shared.ghostTyping = value
@@ -800,6 +807,9 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
         switch (link) {
             case .languageSettings:
                 pushControllerImpl?(context.sharedContext.makeLocalizationListController(context: context))
+            // MARK: Swiftgram Mod
+            case .deletedMessagesLog:
+                pushControllerImpl?(sgDeletedMessagesLogController(context: context))
             case .contentSettings:
                 let _ = (getSGSettingsURL(context: context) |> deliverOnMainQueue).start(next: { [weak context] url in
                     guard let strongContext = context else {

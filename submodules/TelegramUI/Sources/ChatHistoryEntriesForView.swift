@@ -60,7 +60,8 @@ func chatHistoryEntriesForView(
     adMessage: Message?,
     dynamicAdMessages: [Message],
     isMusicPlaylist: Bool,
-    pinToTopStableId: EngineMessage.StableId?
+    pinToTopStableId: EngineMessage.StableId?,
+    sgHiddenAuthorIds: Set<EnginePeer.Id> = Set() // MARK: Swiftgram Mod — Hide Blocked Users
 ) -> ([ChatHistoryEntry], ChatHistoryEntriesForViewState) {
     var currentState = currentState
     
@@ -151,6 +152,11 @@ func chatHistoryEntriesForView(
         }
         
         if pendingRemovedMessages.contains(message.id) {
+            continue
+        }
+        
+        // MARK: Swiftgram Mod — Hide Blocked Users
+        if !sgHiddenAuthorIds.isEmpty, let authorId = message.author?.id, authorId != context.account.peerId, sgHiddenAuthorIds.contains(authorId) {
             continue
         }
         

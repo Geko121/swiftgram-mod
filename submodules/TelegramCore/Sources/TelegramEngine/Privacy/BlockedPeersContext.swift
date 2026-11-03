@@ -234,6 +234,7 @@ public final class BlockedPeersContext {
         let postbox = self.account.postbox
         let network = self.account.network
         let subject = self.subject
+        let sgAccountPeerId = self.account.peerId // MARK: Swiftgram Mod — Hide Blocked Users
         
         var flags: Int32 = 0
         if case .stories = self.subject {
@@ -254,6 +255,11 @@ public final class BlockedPeersContext {
             }
             |> mapToSignal { _ -> Signal<Peer?, BlockedPeersContextAddError> in
                 return postbox.transaction { transaction -> Peer? in
+                    // MARK: Swiftgram Mod — Hide Blocked Users
+                    if case .stories = subject {
+                    } else {
+                        SGBlockedPeers.shared.update(accountPeerId: sgAccountPeerId, peerId: peerId, isBlocked: true)
+                    }
                     if peerId.namespace == Namespaces.Peer.CloudUser {
                         transaction.updatePeerCachedData(peerIds: Set([peerId]), update: { _, current in
                             let previous: CachedUserData
@@ -306,6 +312,7 @@ public final class BlockedPeersContext {
         let postbox = self.account.postbox
         let network = self.account.network
         let subject = self.subject
+        let sgAccountPeerId = self.account.peerId // MARK: Swiftgram Mod — Hide Blocked Users
         
         var flags: Int32 = 0
         if case .stories = self.subject {
@@ -326,6 +333,11 @@ public final class BlockedPeersContext {
             }
             |> mapToSignal { value in
                 return postbox.transaction { transaction -> Peer? in
+                    // MARK: Swiftgram Mod — Hide Blocked Users
+                    if case .stories = subject {
+                    } else {
+                        SGBlockedPeers.shared.update(accountPeerId: sgAccountPeerId, peerId: peerId, isBlocked: false)
+                    }
                     if peerId.namespace == Namespaces.Peer.CloudUser {
                         transaction.updatePeerCachedData(peerIds: Set([peerId]), update: { _, current in
                             let previous: CachedUserData
