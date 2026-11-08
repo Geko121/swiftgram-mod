@@ -632,7 +632,11 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
                 tokenEnvironment = "production"
                 #endif
                 
-                let data = buildConfig.bundleData(withAppToken: token, tokenType: "apns", tokenEnvironment: tokenEnvironment, signatureDict: signatureDict)
+                // MARK: Swiftgram Mod — no APNs token in initConnection: Telegram cannot push to this
+                // app (no certificate for its api_id), and a token makes the server ask for
+                // push-based request verification that then waits out its 15 s timeout.
+                let _ = token
+                let data = buildConfig.bundleData(withAppToken: nil, tokenType: "apns", tokenEnvironment: tokenEnvironment, signatureDict: signatureDict)
                 if let data = data, let _ = String(data: data, encoding: .utf8) {
                 } else {
                     Logger.shared.log("data", "can't deserialize")
@@ -758,6 +762,10 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
             performAppGroupUpgrades(appGroupPath: appGroupUrl.path, rootPath: rootPath)
         }
         
+        // MARK: Swiftgram Mod — performAppGroupUpgrades creates rootPath asynchronously, so on a first
+        // launch .tempkey could not be written and the database key lived only in memory: the next
+        // launch made a new key and recreated the database, losing the login once.
+        try? FileManager.default.createDirectory(atPath: rootPath, withIntermediateDirectories: true, attributes: nil)
         let deviceSpecificEncryptionParameters = BuildConfig.deviceSpecificEncryptionParameters(rootPath, baseAppBundleId: baseAppBundleId)
         let encryptionParameters = ValueBoxEncryptionParameters(forceEncryptionIfNoSet: false, key: ValueBoxEncryptionParameters.Key(data: deviceSpecificEncryptionParameters.key)!, salt: ValueBoxEncryptionParameters.Salt(data: deviceSpecificEncryptionParameters.salt)!)
         
