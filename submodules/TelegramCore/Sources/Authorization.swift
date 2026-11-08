@@ -258,7 +258,10 @@ public func sendAuthorizationCode(accountManager: AccountManager<TelegramAccount
                 return .fail(.generic(info: (Int(error.errorCode), error.errorDescription)))
             }
         }
-        |> timeout(20.0, queue: Queue.concurrentDefaultQueue(), alternate: .fail(.timeout))
+        // MARK: Swiftgram Mod — 20 s did not cover a fresh install's first attempt: moving to the
+        // home datacenter (new auth key) plus a 15 s verification wait for a push that a self-built
+        // app never receives. The first login timed out to the phone screen; the second worked.
+        |> timeout(60.0, queue: Queue.concurrentDefaultQueue(), alternate: .fail(.timeout))
         
         return codeAndAccount
         |> mapToSignal { result, account -> Signal<SendAuthorizationCodeResult, AuthorizationCodeRequestError> in

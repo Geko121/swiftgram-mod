@@ -359,21 +359,10 @@ public final class SharedAccountContextImpl: SharedAccountContext {
         
         self.firebaseSecretStream = firebaseSecretStream
         
-        self.authorizationPushConfigurationValue.set(apsNotificationToken |> map { data -> AuthorizationCodePushNotificationConfiguration? in
-            guard let data else {
-                return nil
-            }
-            let sandbox: Bool
-            #if DEBUG
-            sandbox = true
-            #else
-            sandbox = false
-            #endif
-            return AuthorizationCodePushNotificationConfiguration(
-                token: hexString(data),
-                isSandbox: sandbox
-            )
-        })
+        // MARK: Swiftgram Mod — never offer the APNs token for login verification: Telegram has no
+        // push certificate for this app's api_id, so a push-verified code (Firebase SMS, APNs check)
+        // can only stall the login until it times out.
+        self.authorizationPushConfigurationValue.set(.single(nil))
                 
         if applicationBindings.isMainApp {
             self.locationManager = DeviceLocationManager(queue: Queue.mainQueue())

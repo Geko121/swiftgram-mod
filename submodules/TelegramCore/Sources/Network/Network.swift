@@ -685,7 +685,11 @@ func initializedNetwork(accountId: AccountRecordId, arguments: NetworkInitializa
                 context.setExternalRecaptchaRequestVerification({ method, siteKey in
                     return MTSignal(generator: { subscriber in
                         let disposable = (externalRecaptchaRequestVerification(method, siteKey)
-                        |> filter { $0 != nil }
+                        // MARK: Swiftgram Mod — the verifier completes with nil when reCAPTCHA is
+                        // unavailable (its site key is tied to the official app). Filtering nil left
+                        // the request parked forever, because completion also cancels the timeout:
+                        // answer with the timeout value instead.
+                        |> map { $0 ?? "RECAPTCHA_TIMEOUT" }
                         |> take(1)
                         |> timeout(15.0, queue: .mainQueue(), alternate: .single("RECAPTCHA_TIMEOUT"))).start(next: { token in
                             subscriber?.putNext(token)
